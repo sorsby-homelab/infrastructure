@@ -29,7 +29,7 @@
         newid: "{{ item.newvmid }}"
         clone: "cloud-init-focal"
         full: true
-        timeout: 300 # 5minutes
+        timeout: 300
       loop: "{{ vm_config }}"
       register: vm_details
 
@@ -100,17 +100,17 @@
       register: vm_status
 
     - name: Print VM status
-      debug:
+      ansible.builtin.debug:
         var: vm_status
       loop: "{{ vm_status.results }}"
 
     - name: Print VM details
-      debug:
+      ansible.builtin.debug:
         var: vm_details
       loop: "{{ vm_details.results }}"
 
     - name: Display added VMs
-      debug:
+      ansible.builtin.debug:
         var: vm_details
 
 - name: Test VM creation
@@ -167,6 +167,8 @@
         # yamllint disable-line rule:line-length
         url: "https://github.com/actions/runner/releases/download/v{{ runner_version }}/actions-runner-linux-x64-{{ runner_version }}.tar.gz"
         dest: "{{ runner_dir }}/actions-runner.tar.gz"
+        owner: "{{ cloud_init_user }}"
+        group: "{{ cloud_init_user }}"
 
     - name: Extract GitHub runner package
       ansible.builtin.unarchive:
@@ -177,14 +179,17 @@
     - name: Configure GitHub runner
       ansible.builtin.shell: |
         if [ ! -f "{{ runner_dir }}/.runner" ]; then
-          ./config.sh --unattended --url https://github.com/{{ github_repo }} --token {{ runner_token }}
+          ./config.sh --unattended \
+            --url https://github.com/{{ github_repo }} \
+            --token {{ runner_token }}
         fi
       args:
         chdir: "{{ runner_dir }}"
 
     - name: Check if GitHub runner service is running
       ansible.builtin.shell: |
-        systemctl is-active actions.runner.{{ github_repo }}.{{ inventory_hostname }}.service
+        systemctl is-active \
+          actions.runner.{{ github_repo }}.{{ inventory_hostname }}.service
       register: runner_service_status
       failed_when: false
 
@@ -244,6 +249,7 @@
 
     - name: Test runner connectivity to GitHub
       ansible.builtin.command:
+        # yamllint disable-line rule:line-length
         cmd: "./run.sh --check --url https://github.com/{{ github_repo }} --pat {{ github_access_token }}"
         chdir: "/opt/github-runner"
       register: runner_run_test

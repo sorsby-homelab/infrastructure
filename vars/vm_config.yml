@@ -1,3 +1,4 @@
+---
 ssh_key1: "~/.ssh/id_sorsby_co_rsa.pub"
 vm_config:
   - name: "ghrunner1"
@@ -14,7 +15,7 @@ vm_config:
     ip: 192.168.7.50
     gateway: 192.168.7.1
     netmask: 24
-    public_ssh_key: "{{lookup('ansible.builtin.file', '{{ ssh_key1 }}') }}"
+    public_ssh_key: "{{ lookup('ansible.builtin.file', '{{ ssh_key1 }}') }}"
     net:
       net0: "virtio,bridge=vmbr0"
   - name: "ghrunner2"
@@ -31,6 +32,6 @@ vm_config:
     ip: 192.168.7.51
     gateway: 192.168.7.1
     netmask: 24
-    public_ssh_key: "{{lookup('ansible.builtin.file', '{{ ssh_key1 }}') }}"
+    public_ssh_key: "{{ lookup('ansible.builtin.file', '{{ ssh_key1 }}') }}"
     net:
       net0: "virtio,bridge=vmbr0"

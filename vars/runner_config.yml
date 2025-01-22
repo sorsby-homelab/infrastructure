@@ -1,3 +1,4 @@
+---
 github_repo: "sorsby-homelab"
 runner_version: "2.321.0"
 runner_dir: "/opt/github-runner"
