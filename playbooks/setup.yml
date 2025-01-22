@@ -1,0 +1,256 @@
+---
+- name: Create VMs on Proxmox
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ../vars/secrets.yml
+    - ../vars/vm_config.yml
+  vars:
+    proxmox_api_url: "{{ proxmox_api_url }}"
+    proxmox_user: "{{ proxmox_user }}"
+    proxmox_password: "{{ proxmox_password }}"
+
+  tasks:
+    - name: Ensure Proxmox VE API library is installed
+      ansible.builtin.pip:
+        name: proxmoxer
+      become: true
+
+    - name: Create VMs from clone
+      community.general.proxmox_kvm:
+        api_host: "{{ proxmox_api_url }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        validate_certs: false
+        node: "{{ item.node }}"
+        target: "{{ item.target }}"
+        name: "{{ item.name }}"
+        vmid: "{{ item.vmid }}"
+        newid: "{{ item.newvmid }}"
+        clone: "cloud-init-focal"
+        full: true
+        timeout: 300 # 5minutes
+      loop: "{{ vm_config }}"
+      register: vm_details
+
+    - name: Configure VM
+      community.general.proxmox_kvm:
+        api_host: "{{ proxmox_api_url }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        validate_certs: false
+        node: "{{ item.target }}"
+        name: "{{ item.name }}"
+        cores: "{{ item.cores }}"
+        memory: "{{ item.memory }}"
+        net: "{{ item.net }} "
+        ciuser: "{{ cloud_init_user }}"
+        sshkeys: "{{ item.public_ssh_key }}"
+        numa_enabled: true
+        onboot: true
+        ostype: l26
+        virtio: "{{ item.virtio }}"
+        ipconfig:
+          # yamllint disable-line rule:line-length
+          ipconfig0: 'ip={{ item.ip }}/{{ item.netmask }},gw={{ item.gateway }}'
+        autostart: true
+        state: present
+        update: true
+      loop: "{{ vm_config }}"
+      register: vm_details
+
+    - name: Grow existing disk
+      community.general.proxmox_disk:
+        api_host: "{{ proxmox_api_url }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        vmid: "{{ item.newvmid }}"
+        ssd: true
+        discard: "on"
+        disk: virtio0
+        size: "{{ item.disk_size_gb }}"
+        state: resized
+      with_items: "{{ vm_config }}"
+
+    - name: Start VMs
+      community.general.proxmox_kvm:
+        api_host: "{{ proxmox_api_url }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        validate_certs: false
+        node: "{{ item.target }}"
+        vmid: "{{ item.newvmid }}"
+        state: started
+      loop: "{{ vm_config }}"
+
+    - name: Pause for 30 seconds
+      ansible.builtin.pause:
+        seconds: 30
+
+    - name: Verify VMs are running
+      community.general.proxmox_kvm:
+        api_host: "{{ proxmox_api_url }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        validate_certs: false
+        node: "{{ item.target }}"
+        vmid: "{{ item.newvmid }}"
+        state: started
+      loop: "{{ vm_config }}"
+      register: vm_status
+
+    - name: Print VM status
+      debug:
+        var: vm_status
+      loop: "{{ vm_status.results }}"
+
+    - name: Print VM details
+      debug:
+        var: vm_details
+      loop: "{{ vm_details.results }}"
+
+    - name: Display added VMs
+      debug:
+        var: vm_details
+
+- name: Test VM creation
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ../vars/vm_config.yml
+    - ../vars/secrets.yml
+  tasks:
+    - name: Check VM existence
+      community.general.proxmox_kvm:
+        api_host: "{{ proxmox_api_url }}"
+        api_user: "{{ proxmox_user }}"
+        api_password: "{{ proxmox_password }}"
+        validate_certs: false
+        node: "{{ item.target }}"
+        vmid: "{{ item.newvmid }}"
+        state: started
+      loop: "{{ vm_config }}"
+      register: vm_tests
+
+    - name: Assert VMs are running
+      ansible.builtin.assert:
+        that:
+          - item.status == 'running'
+      loop: "{{ vm_status.results }}"
+
+- name: Install GitHub Runners
+  hosts: github_runners
+  become: false
+  vars_files:
+    - ../vars/runner_config.yml
+    - ../vars/secrets.yml
+  tasks:
+    - name: Ensure required packages are installed
+      ansible.builtin.package:
+        name:
+          - curl
+          - tar
+        state: present
+      become: true
+
+    - name: Create runner directory
+      ansible.builtin.file:
+        path: "{{ runner_dir }}"
+        owner: "{{ cloud_init_user }}"
+        group: "{{ cloud_init_user }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Download GitHub runner package
+      ansible.builtin.get_url:
+        # yamllint disable-line rule:line-length
+        url: "https://github.com/actions/runner/releases/download/v{{ runner_version }}/actions-runner-linux-x64-{{ runner_version }}.tar.gz"
+        dest: "{{ runner_dir }}/actions-runner.tar.gz"
+
+    - name: Extract GitHub runner package
+      ansible.builtin.unarchive:
+        src: "{{ runner_dir }}/actions-runner.tar.gz"
+        dest: "{{ runner_dir }}"
+        remote_src: true
+
+    - name: Configure GitHub runner
+      ansible.builtin.shell: |
+        if [ ! -f "{{ runner_dir }}/.runner" ]; then
+          ./config.sh --unattended --url https://github.com/{{ github_repo }} --token {{ runner_token }}
+        fi
+      args:
+        chdir: "{{ runner_dir }}"
+
+    - name: Check if GitHub runner service is running
+      ansible.builtin.shell: |
+        systemctl is-active actions.runner.{{ github_repo }}.{{ inventory_hostname }}.service
+      register: runner_service_status
+      failed_when: false
+
+    - name: Install runner service
+      ansible.builtin.command:
+        cmd: "./svc.sh install"
+        chdir: "{{ runner_dir }}"
+      become: true
+      when: runner_service_status.stdout != "active"
+
+    - name: Start runner service if not running
+      ansible.builtin.command:
+        cmd: "./svc.sh start"
+        chdir: "{{ runner_dir }}"
+      become: true
+      when: runner_service_status.stdout != "active"
+
+- name: Validate GitHub Runner Installation
+  hosts: github_runners
+  become: true
+  vars_files:
+    - ../vars/runner_config.yml
+    - ../vars/secrets.yml
+  tasks:
+    - name: Check if runner directory exists
+      ansible.builtin.stat:
+        path: "/opt/github-runner"
+      register: runner_dir
+
+    - name: Fail if runner directory does not exist
+      ansible.builtin.fail:
+        msg: "GitHub runner directory does not exist at /opt/github-runner"
+      when: not runner_dir.stat.exists
+
+    - name: Check if runner binary exists
+      ansible.builtin.stat:
+        path: "/opt/github-runner/config.sh"
+      register: runner_binary
+
+    - name: Fail if runner binary does not exist
+      ansible.builtin.fail:
+        msg: "GitHub runner binary (config.sh) is missing"
+      when: not runner_binary.stat.exists
+
+    - name: Verify if runner service is installed
+      ansible.builtin.systemd:
+        # yamllint disable-line rule:line-length
+        name: "actions.runner.{{ github_repo }}.{{ inventory_hostname }}.service"
+        state: started
+        enabled: true
+      register: runner_service
+
+    - name: Fail if runner service is not running
+      ansible.builtin.fail:
+        msg: "GitHub runner service is not active"
+      when: runner_service.status.ActiveState != "active"
+
+    - name: Test runner connectivity to GitHub
+      ansible.builtin.command:
+        cmd: "./run.sh --check --url https://github.com/{{ github_repo }} --pat {{ github_access_token }}"
+        chdir: "/opt/github-runner"
+      register: runner_run_test
+      changed_when: false
+      become: false
+
+    - name: Verify runner test execution result
+      ansible.builtin.fail:
+        msg: "Runner failed to execute a test job: {{ runner_run_test.stderr }}"
+      when: runner_run_test.rc != 0

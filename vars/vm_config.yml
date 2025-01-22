@@ -1,0 +1,36 @@
+ssh_key1: "~/.ssh/id_sorsby_co_rsa.pub"
+vm_config:
+  - name: "ghrunner1"
+    node: "pve1"
+    target: "pve1"
+    vmid: 9000
+    newvmid: 1001
+    cores: 2
+    memory: 2048
+    disk_size_gb: 40G
+    virtio:
+      virtio0: 'LVM:10'
+    vm_storage: 'LVM'
+    ip: 192.168.7.50
+    gateway: 192.168.7.1
+    netmask: 24
+    public_ssh_key: "{{lookup('ansible.builtin.file', '{{ ssh_key1 }}') }}"
+    net:
+      net0: "virtio,bridge=vmbr0"
+  - name: "ghrunner2"
+    node: "pve1"
+    target: "pve2"
+    vmid: 9000
+    newvmid: 1002
+    cores: 2
+    memory: 2048
+    disk_size_gb: 40G
+    virtio:
+      virtio0: 'LVM:10'
+    vm_storage: 'LVM'
+    ip: 192.168.7.51
+    gateway: 192.168.7.1
+    netmask: 24
+    public_ssh_key: "{{lookup('ansible.builtin.file', '{{ ssh_key1 }}') }}"
+    net:
+      net0: "virtio,bridge=vmbr0"

@@ -1,0 +1,8 @@
+[github_runners]
+ghrunner1 ansible_host=192.168.7.50 ansible_user="ubuntu"
+ghrunner2 ansible_host=192.168.7.51 ansible_user="ubuntu"
+
+[proxmox_nodes]
+pve1 ansible_host=192.168.7.115 ansible_user="{{ proxmox_ssh_user }}"
+pve2 ansible_host=192.168.7.114 ansible_user="{{ proxmox_ssh_user }}"
+
