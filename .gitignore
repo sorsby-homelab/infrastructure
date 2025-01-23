@@ -1,5 +1,3 @@
 *.iml
 .idea
 
-# ignore secret files
-vars/secrets.yml
