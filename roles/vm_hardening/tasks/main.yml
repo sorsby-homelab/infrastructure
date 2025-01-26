@@ -1,0 +1,8 @@
+---
+# tasks file for roles/vm_hardening
+- name: Apply devsec OS hardening rules
+  ansible.builtin.include_role:
+    name: devsec.hardening.os_hardening
+- name: Apply devsec SSH hardening rules
+  ansible.builtin.include_role:
+    name: devsec.hardening.ssh_hardening

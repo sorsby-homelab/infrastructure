@@ -1,0 +1,8 @@
+---
+# tasks file for roles/create_vm
+# tasks/main.yml
+- name: Create VM
+  ansible.builtin.import_tasks: create.yml
+
+- name: Configure VM
+  ansible.builtin.import_tasks: configure.yml

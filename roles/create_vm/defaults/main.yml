@@ -1,0 +1,19 @@
+---
+# defaults file for roles/create_vm
+
+create_vm_timeout: 300
+create_vm_clone: cloud-init-focal
+create_vm_full_clone: true
+create_vm_validate_certs: false
+create_vm_numa_enabled: true
+create_vm_onboot: true
+create_vm_ostype: l26
+create_vm_disk: "virtio0"
+create_vm_virtio:
+  virtio0: 'LVM:10'
+create_vm_storage: 'LVM'
+create_vm_ssd: true
+create_vm_net:
+  net0: "virtio,bridge=vmbr0"
+create_vm_netmask: 32
+create_vm_autostart: true
