@@ -1,0 +1,30 @@
+- name: Create VMs on Proxmox
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ../vars/infrastructure.yml
+    - ../vars/vault.yml
+  tasks:
+    - name: Apply create_vm
+      ansible.builtin.include_role:
+        name: create_vm
+      vars:
+        create_vm_node: "{{ template_node }}"
+        create_vm_target: "{{ item.target }}"
+        create_vm_name: "{{ item.name }}"
+        create_vm_newvmid: "{{ item.vmid }}"
+        create_vm_vmid: "{{ template_vmid }}"
+        create_vm_cores: "{{ item.cores }}"
+        create_vm_memory: "{{ item.memory }}"
+        create_vm_ip: "{{ item.ip }}"
+        create_vm_disk_size_gb: "{{ item.disk_size_gb }}"
+      loop: "{{ infrastructure }}"
+
+- name: Harden VMs
+  hosts: all_infra
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Apply create_vm
+      ansible.builtin.include_role:
+        name: vm_hardening

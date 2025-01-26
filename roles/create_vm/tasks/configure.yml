@@ -1,0 +1,47 @@
+---
+# tasks file for roles/create_vm
+- name: Configure VM
+  community.general.proxmox_kvm:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    create_vm_validate_certs: "{{ create_vm_validate_certs }}"
+    node: "{{ create_vm_target }}"
+    name: "{{ create_vm_name }}"
+    cores: "{{ create_vm_cores }}"
+    memory: "{{ create_vm_memory }}"
+    net: "{{ create_vm_net }} "
+    ciuser: "{{ create_vm_cloud_init_user }}"
+    sshkeys: "{{ create_vm_public_ssh_key }}"
+    numa_enabled: "{{ create_vm_numa_enabled }}"
+    onboot: "{{ create_vm_onboot }}"
+    ostype: "{{ create_vm_ostype }}"
+    virtio: "{{ create_vm_virtio }}"
+    ipconfig:
+      # yamllint disable-line rule:line-length
+      ipconfig0: 'ip={{ ip }}/{{ create_vm_netmask }},gw={{ gateway }}'
+    autostart: "{{ create_vm_autostart }}"
+    state: present
+    update: true
+
+- name: Grow existing disk
+  community.general.proxmox_disk:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    vmid: "{{ newvmid }}"
+    ssd: "{{ create_vm_ssd }}"
+    discard: "on"
+    disk: "{{ create_vm_disk }}"
+    size: "{{ disk_size_gb }}"
+    state: resized
+
+- name: Start VMs
+  community.general.proxmox_kvm:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    create_vm_validate_certs: "{{ create_vm_validate_certs }}"
+    node: "{{ target }}"
+    vmid: "{{ newvmid }}"
+    state: started

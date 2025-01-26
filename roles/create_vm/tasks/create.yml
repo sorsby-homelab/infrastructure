@@ -1,0 +1,16 @@
+---
+# tasks file for roles/create_vm
+- name: Create VM
+  community.general.proxmox_kvm:
+    api_host: "{{ proxmox_api_url }}"
+    api_user: "{{ proxmox_user }}"
+    api_password: "{{ proxmox_password }}"
+    create_vm_validate_certs: "{{ create_vm_validate_certs }}"
+    node: "{{ create_vm_node }}"
+    target: "{{ create_vm_target }}"
+    name: "{{ create_vm_name }}"
+    vmid: "{{ create_vm_vmid }}"
+    newid: "{{ create_vm_newvmid }}"
+    create_vm_clone: "{{ create_vm_clone }}"
+    full: "{{ create_vm_full_clone }}"
+    timeout: "{{ create_vm_timeout }}"
