@@ -5,7 +5,7 @@
     api_host: "{{ proxmox_api_url }}"
     api_user: "{{ proxmox_user }}"
     api_password: "{{ proxmox_password }}"
-    create_vm_validate_certs: "{{ create_vm_validate_certs }}"
+    validate_certs: "{{ create_vm_validate_certs }}"
     node: "{{ create_vm_target }}"
     name: "{{ create_vm_name }}"
     cores: "{{ create_vm_cores }}"
@@ -19,7 +19,7 @@
     virtio: "{{ create_vm_virtio }}"
     ipconfig:
       # yamllint disable-line rule:line-length
-      ipconfig0: 'ip={{ ip }}/{{ create_vm_netmask }},gw={{ gateway }}'
+      ipconfig0: 'ip={{ create_vm_ip }}/{{ create_vm_netmask }},gw={{ create_vm_gateway }}'
     autostart: "{{ create_vm_autostart }}"
     state: present
     update: true
@@ -29,11 +29,11 @@
     api_host: "{{ proxmox_api_url }}"
     api_user: "{{ proxmox_user }}"
     api_password: "{{ proxmox_password }}"
-    vmid: "{{ newvmid }}"
+    vmid: "{{ create_vm_newvmid }}"
     ssd: "{{ create_vm_ssd }}"
     discard: "on"
     disk: "{{ create_vm_disk }}"
-    size: "{{ disk_size_gb }}"
+    size: "{{ create_vm_disk_size_gb }}"
     state: resized
 
 - name: Start VMs
@@ -41,7 +41,7 @@
     api_host: "{{ proxmox_api_url }}"
     api_user: "{{ proxmox_user }}"
     api_password: "{{ proxmox_password }}"
-    create_vm_validate_certs: "{{ create_vm_validate_certs }}"
-    node: "{{ target }}"
-    vmid: "{{ newvmid }}"
+    validate_certs: "{{ create_vm_validate_certs }}"
+    node: "{{ create_vm_target }}"
+    vmid: "{{ create_vm_newvmid }}"
     state: started

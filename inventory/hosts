@@ -1,2 +1,7 @@
 [all_infra]
-test1 ansible_host=192.168.7.52 ansible_user="ubuntu"
+haproxy1 ansible_host=192.168.7.52 ansible_user="ubuntu"
+haproxy2 ansible_host=192.168.7.53 ansible_user="ubuntu"
+
+[haproxy]
+haproxy1 ansible_host=192.168.7.52 ansible_user="ubuntu"
+haproxy2 ansible_host=192.168.7.53 ansible_user="ubuntu"
