@@ -9,5 +9,8 @@ install:
 run:
 	ansible-playbook playbooks/infrastructure.yml --ask-vault-pass -v
 
+dry_run:
+	ansible-playbook playbooks/infrastructure.yml --ask-vault-pass -v --check
+
 test:
 	ansible-playbook playbooks/setup.yml --tags "test"

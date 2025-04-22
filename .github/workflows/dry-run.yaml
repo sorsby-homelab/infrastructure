@@ -1,0 +1,56 @@
+---
+name: Dry Run
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+  pull_request:
+
+jobs:
+  dryrun:
+    name: Dry Run
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-lint ansible yamllint
+          ansible-galaxy collection install community.general devsec.hardening hifis.toolkit
+          ansible-galaxy role install geerlingguy.haproxy
+
+      - name: Install Ansible and dependencies
+        run: |
+          python -m pip install --upgrade pip
+
+      - name: Create ansible password file
+        env:
+          ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        run: echo $ANSIBLE_VAULT_PASSWORD > .vault_password
+
+      - name: Create SSH key
+        env:
+          SSH_PUB_KEY: ${{ secrets.SSH_PUB_KEY }}
+          SSH_PRIV_KEY: ${{ secrets.SSH_PRIV_KEY }}
+        run: | 
+          echo $SSH_PUB_KEY > ~/.ssh/id_sorsby_co_rsa.pub
+          echo $SSH_PRIV_KEY > ~/.ssh/id_sorsby_co_rsa 
+          chmod 0600 ~/.ssh/id_sorsby_co_rsa 
+
+      - name: Dry Run
+        run: |
+          ANSIBLE_VAULT_PASSWORD_FILE=.vault_password ansible-playbook playbooks/infrastructure.yml --check
+
+      - name: Clean up ansible secret
+        run: rm .vault_password
