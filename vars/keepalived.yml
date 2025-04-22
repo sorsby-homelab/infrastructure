@@ -1,0 +1,2 @@
+keepalived_unicast_peers: "{{ groups['haproxy'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | list }}"
+keepalived_virtual_ip_address: '192.168.7.240'

@@ -1,4 +1,3 @@
 playbooks/setup.yml risky-file-permissions
 playbooks/setup.yml command-instead-of-module
 playbooks/setup.yml no-changed-when
-

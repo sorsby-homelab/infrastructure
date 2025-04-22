@@ -1,8 +1,15 @@
 infrastructure:
-  - name: "test1"
+  - name: "haproxy1"
     target: "pve1"
     vmid: 1003
     cores: 2
     memory: 2048
     disk_size_gb: 40G
     ip: 192.168.7.52
+  - name: "haproxy2"
+    target: "pve2"
+    vmid: 1004
+    cores: 2
+    memory: 2048
+    disk_size_gb: 40G
+    ip: 192.168.7.53
