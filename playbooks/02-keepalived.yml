@@ -1,0 +1,31 @@
+- name: Pre-setup for keepalived
+  hosts: kube_control_plane
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: Create keepalived script user
+      ansible.builtin.user:
+        name: keepalive
+        system: true
+        shell: /usr/sbin/nologin
+        create_home: false
+
+    - name: Copy Kubernetes API server health check script
+      ansible.builtin.copy:
+        src: check_kube_apiserver.sh
+        dest: /usr/local/bin/check_kube_apiserver.sh
+        mode: '0755'
+        owner: 'keepalive'
+        group: 'keepalive'
+
+- name: Install keepalived
+  hosts: kube_control_plane
+  become: true
+  gather_facts: true
+
+  vars_files:
+    - ../vars/keepalived.yml
+
+  roles:
+    - hifis.toolkit.keepalived

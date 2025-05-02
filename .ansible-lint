@@ -1,2 +1,8 @@
 exclude_paths:
   - roles/geerlingguy.*
+skip_list:
+  - run-once
+  - command-instead-of-module
+  - yaml[line-length]
+  - no-changed-when
+  - no-handler

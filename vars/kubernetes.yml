@@ -1,0 +1,4 @@
+containerd_config_cgroup_driver_systemd: true
+
+kubernetes_apt_release_channel: "stable"
+kubernetes_version: 1.33
