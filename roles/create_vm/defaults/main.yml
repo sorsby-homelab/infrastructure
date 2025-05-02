@@ -1,7 +1,7 @@
 ---
 # defaults file for roles/create_vm
 
-create_vm_timeout: 300
+create_vm_timeout: 1200
 create_vm_clone: cloud-init-focal
 create_vm_full_clone: true
 create_vm_validate_certs: false

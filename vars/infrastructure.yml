@@ -1,15 +1,64 @@
 infrastructure:
-  - name: "haproxy1"
+  - name: "kubemaster01"
+    target: "pve1"
+    vmid: 1005
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.54
+  - name: "kubemaster02"
+    target: "pve2"
+    vmid: 1006
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.55
+  - name: "kubemaster03"
+    target: "pve1"
+    vmid: 1007
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.56
+  - name: "kubeworker01"
     target: "pve1"
     vmid: 1003
-    cores: 2
-    memory: 2048
+    cores: 4
+    memory: 6144
     disk_size_gb: 40G
     ip: 192.168.7.52
-  - name: "haproxy2"
+  - name: "kubeworker02"
     target: "pve2"
     vmid: 1004
-    cores: 2
-    memory: 2048
+    cores: 4
+    memory: 6144
     disk_size_gb: 40G
     ip: 192.168.7.53
+  - name: "kubeworker03"
+    target: "pve1"
+    vmid: 1008
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.57
+  - name: "kubeworker04"
+    target: "pve2"
+    vmid: 1009
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.58
+  - name: "kubeworker05"
+    target: "pve1"
+    vmid: 1010
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.59
+  - name: "kubeworker06"
+    target: "pve2"
+    vmid: 1011
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.60

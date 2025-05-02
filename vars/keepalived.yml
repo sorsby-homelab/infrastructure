@@ -1,2 +1,8 @@
-keepalived_unicast_peers: "{{ groups['haproxy'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | list }}"
+keepalived_unicast_peers: "{{ groups['kube_control_plane'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | list }}"
 keepalived_virtual_ip_address: '192.168.7.240'
+keepalived_track_process: 'kubelet'
+keepalived_script_name: 'check_kube_apiserver'
+keepalived_script_command: '/usr/local/bin/check_kube_apiserver.sh'
+keepalived_activate_script: true
+keepalived_script_user: 'keepalive'
+keepalived_script_group: 'keepalive'

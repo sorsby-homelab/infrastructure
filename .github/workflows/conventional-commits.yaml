@@ -7,6 +7,10 @@ on:
     # yamllint disable-line rule:brackets
     branches: [ main ]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Conventional Commits

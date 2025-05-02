@@ -1,7 +1,33 @@
 [all_infra]
-haproxy1 ansible_host=192.168.7.52 ansible_user="ubuntu"
-haproxy2 ansible_host=192.168.7.53 ansible_user="ubuntu"
+kubemaster01 ansible_host=192.168.7.54 ansible_user="ubuntu"
+kubemaster02 ansible_host=192.168.7.55 ansible_user="ubuntu"
+kubemaster03 ansible_host=192.168.7.56 ansible_user="ubuntu"
+kubeworker01 ansible_host=192.168.7.52 ansible_user="ubuntu"
+kubeworker02 ansible_host=192.168.7.53 ansible_user="ubuntu"
+kubeworker03 ansible_host=192.168.7.57 ansible_user="ubuntu"
+kubeworker04 ansible_host=192.168.7.58 ansible_user="ubuntu"
+kubeworker05 ansible_host=192.168.7.59 ansible_user="ubuntu"
+kubeworker06 ansible_host=192.168.7.60 ansible_user="ubuntu"
 
-[haproxy]
-haproxy1 ansible_host=192.168.7.52 ansible_user="ubuntu"
-haproxy2 ansible_host=192.168.7.53 ansible_user="ubuntu"
+[kube_control_plane]
+kubemaster01
+kubemaster02
+kubemaster03
+
+[etcd]
+kubemaster01
+kubemaster02
+kubemaster03
+
+[kube_node]
+kubeworker01
+kubeworker02
+kubeworker03
+kubeworker04
+kubeworker05
+kubeworker06
+
+[k8s_cluster:children]
+kube_control_plane
+etcd
+kube_node
