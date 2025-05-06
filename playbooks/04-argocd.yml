@@ -1,0 +1,47 @@
+- name: Setup masters
+  hosts: kube_control_plane[0]
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../vars/argocd.yml
+  tasks:
+    - name: Ensure pip3 is installed
+      package:
+        name: python3-pip
+        state: present
+      become: yes
+
+    - name: Ensure kubernetes Python module is installed
+      pip:
+        name: kubernetes
+        state: present
+
+    - name: Create ArgoCD namespace
+      kubernetes.core.k8s:
+        api_version: v1
+        kind: Namespace
+        name: "{{ argocd_namespace }}"
+        state: present
+
+    - name: Install ArgoCD
+      kubernetes.core.k8s:
+        src: "{{ argocd_manifest_url }}"
+        state: present
+        namespace: "{{ argocd_namespace }}"
+
+    - name: Wait for ArgoCD server to be available
+      kubernetes.core.k8s_info:
+        kind: Deployment
+        namespace: "{{ argocd_namespace }}"
+        name: argocd-server
+      register: argocd_deploy
+      until: argocd_deploy.resources[0].status.availableReplicas is defined and argocd_deploy.resources[0].status.availableReplicas > 0
+      retries: 30
+      delay: 10
+
+    - name: Apply root ArgoCD Application
+      kubernetes.core.k8s:
+        state: present
+        namespace: "{{ argocd_namespace }}"
+        definition: "{{ lookup('file', 'files/argo-application.yaml') | from_yaml }}"
+
