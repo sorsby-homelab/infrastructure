@@ -8,6 +8,7 @@ kubeworker03 ansible_host=192.168.7.57 ansible_user="ubuntu"
 kubeworker04 ansible_host=192.168.7.58 ansible_user="ubuntu"
 kubeworker05 ansible_host=192.168.7.59 ansible_user="ubuntu"
 kubeworker06 ansible_host=192.168.7.60 ansible_user="ubuntu"
+coredns01 ansible_host=192.168.7.61 ansible_user="ubuntu"
 
 [kube_control_plane]
 kubemaster01
@@ -31,3 +32,6 @@ kubeworker06
 kube_control_plane
 etcd
 kube_node
+
+[coredns]
+coredns01

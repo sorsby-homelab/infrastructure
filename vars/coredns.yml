@@ -1,0 +1,3 @@
+coredns_config_file: "/etc/coredns/Corefile"
+coredns_zone_files_paths:
+  - "templates/db.lab.sorsby.co"

@@ -19,7 +19,7 @@
         owner: 'keepalive'
         group: 'keepalive'
 
-- name: Install keepalived
+- name: Install K8s keepalived
   hosts: kube_control_plane
   become: true
   gather_facts: true
