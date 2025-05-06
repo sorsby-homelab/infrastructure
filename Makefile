@@ -9,6 +9,9 @@ install:
 run:
 	ansible-playbook playbooks/main.yml --ask-vault-pass -v
 
+infra:
+	ansible-playbook playbooks/01-infrastructure.yml --ask-vault-pass -v
+
 keepalived:
 	ansible-playbook playbooks/02-keepalived.yml --ask-vault-pass -v
 

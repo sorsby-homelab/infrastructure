@@ -17,11 +17,20 @@
   roles:
     - role: rolehippie.coredns
       vars:
+        coredns_general_plugins:
+          - name: errors
+          - name: log
+          - name: prometheus
+          - name: health
+          - name: forward
+            args: . 8.8.8.8 1.1.1.1
+          - name: cache
+            args: 30
+          - name: loop
+          - name: loadbalance
         coredns_default_zones:
             - name: lab.sorsby.co
               plugins:
-                - name: file
-                  args: /etc/coredns/zones/lab.sorsby.co lab.sorsby.co
                 - name: log
                 - name: errors
               content: |
@@ -44,8 +53,10 @@
                 k8sworker05     IN      A       192.168.7.59
                 k8sworker06     IN      A       192.168.7.60
                 coredns01       IN      A       192.168.7.61
+                coredns02       IN      A       192.168.7.62
+                coredns         IN      A       192.168.7.239
                 apiserver       IN      A       192.168.7.240
-                pve2            IN      A       192.168.7.113
+                pve1            IN      A       192.168.7.113
                 pve2            IN      A       192.168.7.114
                 argocd          IN      A       192.168.7.241
                 grafana         IN      A       192.168.7.241
