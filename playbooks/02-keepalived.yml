@@ -1,5 +1,5 @@
 - name: Pre-setup for keepalived
-  hosts: kube_control_plane
+  hosts: keepalived
   become: true
   gather_facts: false
 
@@ -18,14 +18,35 @@
         mode: '0755'
         owner: 'keepalive'
         group: 'keepalive'
+      when: inventory_hostname in groups['kube_control_plane']
 
-- name: Install keepalived
+    - name: Copy coredns API health check script
+      ansible.builtin.copy:
+        src: check_coredns.sh
+        dest: /usr/local/bin/check_coredns.sh
+        mode: '0755'
+        owner: 'keepalive'
+        group: 'keepalive'
+      when: inventory_hostname in groups['coredns']
+
+- name: Install K8s keepalived
   hosts: kube_control_plane
   become: true
   gather_facts: true
 
   vars_files:
     - ../vars/keepalived.yml
+
+  roles:
+    - hifis.toolkit.keepalived
+
+- name: Install coredns keepalived
+  hosts: coredns
+  become: true
+  gather_facts: true
+
+  vars_files:
+    - ../vars/coredns.yml
 
   roles:
     - hifis.toolkit.keepalived
