@@ -62,3 +62,17 @@ infrastructure:
     memory: 6144
     disk_size_gb: 40G
     ip: 192.168.7.60
+  - name: "coredns01"
+    target: "pve1"
+    vmid: 1012
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.61
+  - name: "coredns02"
+    target: "pve2"
+    vmid: 1013
+    cores: 4
+    memory: 6144
+    disk_size_gb: 40G
+    ip: 192.168.7.62

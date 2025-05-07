@@ -1,0 +1,67 @@
+- name: Install coredns
+  hosts: coredns
+  become: true
+  gather_facts: true
+  vars_files:
+    - ../vars/coredns.yml
+  tasks:
+    - name: Stop systemd-resolved service
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: stopped
+
+    - name: Disable systemd-resolved service
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        enabled: false
+  roles:
+    - role: rolehippie.coredns
+      vars:
+        coredns_general_plugins:
+          - name: errors
+          - name: log
+          - name: prometheus
+          - name: health
+          - name: forward
+            args: . 8.8.8.8 1.1.1.1
+          - name: cache
+            args: 30
+          - name: loop
+          - name: loadbalance
+        coredns_default_zones:
+          - name: lab.sorsby.co
+            plugins:
+              - name: log
+              - name: errors
+            content: |
+              $ORIGIN lab.sorsby.co.
+              @ IN SOA ns1.lab.sorsby.co. liam.sorsby.co. (
+                  2024092101 ; serial
+                  28800      ; refresh
+                  7200       ; retry
+                  864000     ; expire
+                  86400 )    ; minimum
+              @ IN NS ns1.lab.sorsby.co.
+              @ IN NS ns2.lab.sorsby.co.
+              k8smaster01     IN      A       192.168.7.54
+              k8smaster02     IN      A       192.168.7.55
+              k8smaster03     IN      A       192.168.7.56
+              k8sworker01     IN      A       192.168.7.52
+              k8sworker02     IN      A       192.168.7.53
+              k8sworker03     IN      A       192.168.7.57
+              k8sworker04     IN      A       192.168.7.58
+              k8sworker05     IN      A       192.168.7.59
+              k8sworker06     IN      A       192.168.7.60
+              coredns01       IN      A       192.168.7.61
+              coredns02       IN      A       192.168.7.62
+              coredns         IN      A       192.168.7.239
+              apiserver       IN      A       192.168.7.240
+              pve1            IN      A       192.168.7.113
+              pve2            IN      A       192.168.7.114
+              argocd          IN      A       192.168.7.242
+              grafana         IN      A       192.168.7.241
+              alertmanager    IN      A       192.168.7.241
+              prometheus      IN      A       192.168.7.241
+              home-assistant  IN      A       192.168.7.241
+
+              $ORIGIN lab.sorsby.co.

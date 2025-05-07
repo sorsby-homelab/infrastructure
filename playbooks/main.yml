@@ -4,3 +4,5 @@
   import_playbook: 02-keepalived.yml
 - name: Initialise kubernetes
   import_playbook: 03-init-k8s.yml
+- name: Initialise argocd
+  import_playbook: 04-argocd.yml
