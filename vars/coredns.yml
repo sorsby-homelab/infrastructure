@@ -1,0 +1,8 @@
+keepalived_unicast_peers: "{{ groups['coredns'] | map('extract', hostvars, ['ansible_default_ipv4', 'address']) | list }}"
+keepalived_virtual_ip_address: '192.168.7.239'
+keepalived_track_process: 'coredns'
+keepalived_script_name: 'check_coredns'
+keepalived_script_command: '/usr/local/bin/check_coredns.sh'
+keepalived_activate_script: true
+keepalived_script_user: 'keepalive'
+keepalived_script_group: 'keepalive'

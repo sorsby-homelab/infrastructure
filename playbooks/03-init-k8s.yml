@@ -91,7 +91,7 @@
       ansible.builtin.stat:
         path: /etc/kubernetes/admin.conf
       register: kubernetes_init_stat
-      changed_when: kubernetes_init_stat.rc != 0
+      changed_when: false
 
     - name: Get certificate key if cluster is already initialized
       ansible.builtin.shell:
@@ -174,15 +174,12 @@
       delegate_facts: true
       run_once: true
       register: set_global_join
-      changed_when: set_global_join.rc != 0
 
     - name: Display join command (if the cluster was already initialized)
       ansible.builtin.debug:
         msg: "{{ hostvars[groups['kube_control_plane'][0]].global_join_command }}"
       delegate_to: "{{ groups['kube_control_plane'][0] }}"
       run_once: true
-      register: display_command
-      changed_when: display_command.rc != 0
 
     - name: Check if Kubernetes has already been initialized.
       ansible.builtin.stat:

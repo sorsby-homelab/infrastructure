@@ -8,6 +8,7 @@
     validate_certs: "{{ create_vm_validate_certs }}"
     node: "{{ create_vm_target }}"
     name: "{{ create_vm_name }}"
+    cpu: "{{ create_vm_cpu }}"
     cores: "{{ create_vm_cores }}"
     memory: "{{ create_vm_memory }}"
     net: "{{ create_vm_net }} "
