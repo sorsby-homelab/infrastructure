@@ -58,10 +58,11 @@
               apiserver       IN      A       192.168.7.240
               pve1            IN      A       192.168.7.113
               pve2            IN      A       192.168.7.114
-              argocd          IN      A       192.168.7.242
+              argocd          IN      A       192.168.7.241
               grafana         IN      A       192.168.7.241
               alertmanager    IN      A       192.168.7.241
               prometheus      IN      A       192.168.7.241
               home-assistant  IN      A       192.168.7.241
+              proxysql        IN      A       192.168.7.241
 
               $ORIGIN lab.sorsby.co.
