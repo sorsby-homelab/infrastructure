@@ -1,8 +1,9 @@
 ---
-name: Lint
+name: Deployment
 
 # yamllint disable-line rule:truthy
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -10,17 +11,28 @@ on:
   pull_request:
 
 concurrency:
-  group: ci-lint-${{ github.ref }}
+  group: ci-deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  lint:
-    name: Lint
+  deploy:
+    name: Deployment
+    permissions:
+      contents: read
     runs-on: self-hosted
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_CERT }}" > ~/.ssh/id_sorsby_co_rsa.pub
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_sorsby_co_rsa
+          chmod 600 ~/.ssh/id_sorsby_co_rsa*
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_sorsby_co_rsa
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -30,7 +42,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ansible-lint ansible yamllint kubernetes
+          pip install ansible-lint ansible yamllint kubernetes proxmoxer
           ansible-galaxy collection install community.general devsec.hardening hifis.toolkit kubernetes.core
           ansible-galaxy role install geerlingguy.haproxy geerlingguy.containerd rolehippie.coredns
 
@@ -43,13 +55,12 @@ jobs:
           ANSIBLE_VAULT_PASSWORD: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
         run: echo $ANSIBLE_VAULT_PASSWORD > .vault_password
 
-      - name: Lint YAML files
+      - name: Deploy
         run: |
-          yamllint .
-
-      - name: Lint Ansible code
-        run: |
-          ANSIBLE_VAULT_PASSWORD_FILE=.vault_password ansible-lint
+          ANSIBLE_VAULT_PASSWORD_FILE=.vault_password ansible-playbook playbooks/main.yml -v
 
       - name: Clean up ansible secret
         run: rm .vault_password
+
+      - name: Clean up ssh keys
+        run: rm ~/.ssh/id_sorsby_co_rsa.pub ~/.ssh/id_sorsby_co_rsa
