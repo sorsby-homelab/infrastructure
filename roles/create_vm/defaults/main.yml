@@ -15,6 +15,6 @@ create_vm_virtio:
 create_vm_storage: 'LVM'
 create_vm_ssd: true
 create_vm_net:
-  net0: "virtio,bridge=vmbr0"
+  net0: "virtio,bridge=vmbr1"
 create_vm_netmask: 32
 create_vm_autostart: true
